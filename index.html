@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sentinel — Real-time fraud detection</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <span class="brand-mark">S</span>
+          <div>
+            <strong>Sentinel</strong>
+            <p>Real-time payment AI</p>
+          </div>
+        </div>
+        <nav>
+          <button data-route="overview" class="active">Overview</button>
+          <button data-route="monitor">Live monitor</button>
+          <button data-route="alerts">Alert queue</button>
+          <button data-route="lab">Score a payment</button>
+          <button data-route="how">How it works</button>
+        </nav>
+        <div class="sidebar-foot">
+          <p>Hold funds <em>before</em> settlement so loss never posts.</p>
+        </div>
+      </aside>
+
+      <main>
+        <header class="topbar">
+          <div>
+            <h1 id="page-title">Overview</h1>
+            <p id="page-sub">Stop suspicious transactions before they become a chargeback.</p>
+          </div>
+          <div class="top-actions">
+            <div class="sim-pill">
+              <span class="dot" id="sim-dot"></span>
+              <span id="sim-label">Live feed on</span>
+            </div>
+            <button id="sim-toggle" class="ghost">Pause stream</button>
+          </div>
+        </header>
+
+        <section id="view-overview" class="view">
+          <div class="kpi-grid" id="kpi-grid"></div>
+          <div class="split">
+            <article class="panel">
+              <div class="panel-head">
+                <h2>Decision mix</h2>
+                <span>Approve · Review · Block</span>
+              </div>
+              <div id="mix-bars" class="mix-bars"></div>
+              <p class="hint">
+                Block happens in milliseconds, while the payment is still in authorization — not after the money has left.
+              </p>
+            </article>
+            <article class="panel">
+              <div class="panel-head">
+                <h2>Top risk signals</h2>
+                <span>Explainable AI</span>
+              </div>
+              <div id="reason-list"></div>
+            </article>
+          </div>
+          <article class="panel">
+            <div class="panel-head">
+              <h2>Latest scored payments</h2>
+              <span>Newest first</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>Customer</th>
+                    <th>Merchant</th>
+                    <th>Amount</th>
+                    <th>Score</th>
+                    <th>Decision</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="overview-rows"></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <section id="view-monitor" class="view hidden">
+          <div class="toolbar">
+            <input id="search" type="search" placeholder="Search customer, merchant, country…" />
+            <select id="decision-filter">
+              <option value="">All decisions</option>
+              <option value="approve">Approve</option>
+              <option value="review">Review</option>
+              <option value="block">Block</option>
+            </select>
+            <select id="status-filter">
+              <option value="">All statuses</option>
+              <option value="held">Held</option>
+              <option value="settled">Settled</option>
+              <option value="cleared">Cleared</option>
+              <option value="confirmed-fraud">Confirmed fraud</option>
+            </select>
+          </div>
+          <div class="monitor-grid">
+            <article class="panel grow">
+              <div class="table-wrap tall">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Id</th>
+                      <th>Customer</th>
+                      <th>Merchant</th>
+                      <th>Geo</th>
+                      <th>Amount</th>
+                      <th>Score</th>
+                      <th>Decision</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="monitor-rows"></tbody>
+                </table>
+              </div>
+            </article>
+            <article class="panel inspect" id="inspect-panel">
+              <p class="muted">Select a payment to inspect the model reasons.</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="view-alerts" class="view hidden">
+          <div class="alert-tabs" id="alert-tabs">
+            <button data-filter="pending" class="active">Pending Holds</button>
+            <button data-filter="resolved">Resolved</button>
+            <button data-filter="all">All Alerts</button>
+          </div>
+          <div id="alert-list" class="alert-list"></div>
+        </section>
+
+        <section id="view-lab" class="view hidden">
+          <div class="split">
+            <article class="panel">
+              <div class="panel-head">
+                <h2>Authorize a test payment</h2>
+                <span>Scored in real time</span>
+              </div>
+              <div class="presets-container">
+                <span class="chip" style="align-self:center">Demo Scenarios:</span>
+                <button type="button" class="btn-preset" data-preset="normal">🟢 Grocery ($45)</button>
+                <button type="button" class="btn-preset" data-preset="travel">🟡 Flight ($1,200)</button>
+                <button type="button" class="btn-preset" data-preset="attack">🔴 Crypto ($14,500)</button>
+              </div>
+              <form id="score-form" class="form">
+                <label>
+                  Customer
+                  <select name="userId" id="user-select"></select>
+                </label>
+                <label>
+                  Merchant
+                  <input name="merchant" value="NightWire Transfers" required />
+                </label>
+                <label>
+                  Category
+                  <input name="category" value="Money movement" />
+                </label>
+                <div class="form-row">
+                  <label>
+                    Amount (USD)
+                    <input name="amount" type="number" min="1" step="0.01" value="12400" required />
+                  </label>
+                  <label>
+                    Country
+                    <input name="country" value="NG" maxlength="2" />
+                  </label>
+                </div>
+                <div class="form-row">
+                  <label>
+                    City
+                    <input name="city" value="Lagos" />
+                  </label>
+                  <label>
+                    Device
+                    <input name="device" value="Unknown Android" />
+                  </label>
+                </div>
+                <label>
+                  Channel
+                  <select name="channel">
+                    <option value="web">web</option>
+                    <option value="app">app</option>
+                    <option value="pos">pos</option>
+                  </select>
+                </label>
+                <button type="submit">Score &amp; hold if risky</button>
+              </form>
+            </article>
+            <article class="panel" id="lab-result">
+              <p class="muted">Submit a payment to see the risk breakdown.</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="view-how" class="view hidden">
+          <article class="panel prose">
+            <h2>How real-time AI stops loss before it posts</h2>
+            <p>
+              Card networks authorize in ~100ms. Sentinel sits in that window: it reads the live
+              transaction plus the customer’s history, scores it, and either lets settlement continue
+              or <strong>holds the funds</strong>. A hold means the merchant never receives the money,
+              so a stolen-card purchase cannot become a loss.
+            </p>
+            <ol>
+              <li>
+                <strong>Transactional features.</strong> Amount, merchant, device, geo, channel, and
+                time are joined to the customer baseline (typical spend, countries, devices).
+              </li>
+              <li>
+                <strong>Signals, not a black box.</strong> Velocity, impossible travel, card testing
+                (tiny charges then a spike), new device, and risky merchants each add an explainable
+                weight.
+              </li>
+              <li>
+                <strong>Decision policy.</strong> Score ≥ 72 blocks before settlement. 42–71 goes to
+                an analyst queue. Below 42 auto-approves so good customers are not delayed.
+              </li>
+              <li>
+                <strong>Human loop.</strong> Analysts confirm fraud or clear a false positive. That
+                label can later retrain a production model.
+              </li>
+            </ol>
+            <p>
+              This demo uses a transparent weighted model so you can see every reason. In production
+              the same event stream would feed gradient-boosted trees or a sequence model, with rules
+              as a safety layer.
+            </p>
+          </article>
+        </section>
+      </main>
+    </div>
+    <script src="/app.js"></script>
+  </body>
+</html>

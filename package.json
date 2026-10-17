@@ -1,0 +1,16 @@
+{
+  "name": "simple-backend",
+  "version": "1.0.0",
+  "description": "Sentinel — real-time fraud detection full-stack app",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "keywords": [],
+  "license": "MIT",
+  "type": "commonjs",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
